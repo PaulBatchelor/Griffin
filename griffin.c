@@ -36,7 +36,8 @@ static void *listen(void *ud)
         printf("There was a problem reading the Griffin Knob. Exiting gracefully...\n");
         return NULL;
     }
-    while(gd->run) {
+    while(1) {
+        if(gd->run != 1) break;
         fread(msg, sizeof(char), 24, fp);
         if(msg[STATE] != 0) { switch(msg[STATE]) {
                 case KNOB:
@@ -61,6 +62,7 @@ static void *listen(void *ud)
 
     fprintf(stderr, "Stopping Griffin Knob...\n");
     fclose(fp);
+    gd->run = 0;
     pthread_exit(NULL);
 }
 
@@ -73,9 +75,10 @@ int griffin_start(griffin_d *gd)
 }
 int griffin_stop(griffin_d *gd)
 {
-    gd->run = 0;
+    gd->run = -1;
     //usleep(5000);
-    sleep(1);
+    //sleep(1);
+    while(gd->run != 0) {};
     return 0;
 }
 
